@@ -1,16 +1,34 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Hello from '@/components/Hello'
+
+// 1 import components to be rendered for each route
+import CreateLink from '../components/CreateLink.vue'
+import LinkList from '../components/LinkList.vue'
+import AppLogin from '../components/AppLogin.vue'
+import Search from '../components/Search.vue'
 
 Vue.use(Router)
 
 export default new Router({
+  // 2 map each route to the proper component to be rendered
   routes: [
     {
       path: '/',
-      name: 'Hello',
-      component: Hello
+      component: LinkList
+    },
+    {
+      path: '/create',
+      component: CreateLink
+    },
+    {
+      path: '/login',
+      component: AppLogin
+    },
+    {
+      path: '/search',
+      component: Search
     }
   ],
+  // 3 set mode to 'history' to remove the hash from URLs
   mode: 'history'
 })

@@ -1,16 +1,21 @@
 <template>
   <div id="app">
-    <link-list></link-list>
+    <div class="center w85">
+      <app-header></app-header>
+      <div class="ph3 pv1 background-gray">
+        <router-view></router-view>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import LinkList from './components/LinkList'
+import AppHeader from './components/AppHeader.vue'
 
 export default {
   name: 'app',
   components: {
-    LinkList
+    AppHeader
   }
 }
 </script>
