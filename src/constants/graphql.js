@@ -30,11 +30,15 @@ export const ALL_LINKS_QUERY = gql`
 export const CREATE_LINK_MUTATION = gql`
   # 2 define the actual mutation. It takes two arguments, url and description, to be provided when it is called
   mutation createLinkMutation($description: String!, $url: String!) {
-    createLink(description: $description, url: $url) {
+    createLink(description: $description, url: $url, postedById: $postedById) {
       id
       createdAt
       url
       description
+      postedBy {
+        id
+        name
+      }
     }
   }
 `
