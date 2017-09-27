@@ -14,7 +14,7 @@ export default new Router({
   routes: [
     {
       path: '/',
-      component: LinkList
+      redirect: '/new/1'
     },
     {
       path: '/create',
@@ -25,8 +25,16 @@ export default new Router({
       component: AppLogin
     },
     {
+      path: '/new/:page',
+      component: LinkList
+    },
+    {
       path: '/search',
       component: Search
+    },
+    {
+      path: '/top',
+      component: LinkList
     }
   ],
   // 3 set mode to 'history' to remove the hash from URLs

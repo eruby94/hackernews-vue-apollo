@@ -1,9 +1,18 @@
 <template>
   <div>
-    <!-- 1 use v-if to display a loading indicator while data is being fetched -->
-    <h4 v-if="loading">Loading...</h4>
-    <link-item v-for="(link, index) in allLinks" :key="link.id" :link="link" :index="index">
-    </link-item>
+    <div>
+      <link-item
+        v-for="(link, index) in orderedLinks"
+        :key="link.id"
+        :link="link"
+        :index="index"
+        :pageNumber="pageNumber">
+      </link-item>
+    </div>
+    <div v-if="isNewPage">
+      <button v-show="!isFirstPage" @click="previousPage()">Previous</button>
+      <button v-show="morePages" @click="nextPage()">Next</button>
+    </div>
   </div>
 </template>
 
@@ -14,24 +23,88 @@ import {
   NEW_LINKS_SUBSCRIPTION,
   NEW_VOTES_SUBSCRIPTION
 } from '../constants/graphql'
+import { LINKS_PER_PAGE } from '../constants/settings'
 import LinkItem from './LinkItem'
+import _ from 'lodash'
 
 export default {
   name: 'LinkList',
+  computed: {
+    orderedLinks() {
+      if (this.$route.path.includes('top')) {
+        return _.orderBy(this.allLinks, 'votes.length').reverse()
+      } else {
+        return this.allLinks
+      }
+    },
+    isFirstPage() {
+      return this.$route.params.page === '1'
+    },
+    isNewPage() {
+      return this.$route.path.includes('new')
+    },
+    pageNumber(index) {
+      return parseInt(this.$route.params.page, 10)
+    },
+    morePages() {
+      return parseInt(this.$route.params.page, 10) < this.count / LINKS_PER_PAGE
+    }
+  },
   data() {
     return {
       // 3 initialize the data properties as needed (loading will be incremented to 1 when the data is laoded)
       allLinks: [],
-      loading: 0
+      loading: 0,
+      count: 0
     }
   },
   components: {
     LinkItem
   },
+  methods: {
+    getLinksToRender(isNewPage) {
+      if (isNewPage) {
+        return this.$apollo.queries.allLinks
+      }
+      const rankedLinks = this.$apollo.queries.allLinks.slice()
+      rankedLinks.sort((l1, l2) => l2.votes.length - l1.votes.length)
+      return rankedLinks
+    },
+    nextPage() {
+      const page = parseInt(this.$route.params.page, 10)
+      if (page < this.count / LINKS_PER_PAGE) {
+        const nextPage = page + 1
+        this.$router.push({ path: `/new/${nextPage}` })
+      }
+    },
+    previousPage() {
+      const page = parseInt(this.$route.params.page, 10)
+      if (page > 1) {
+        const previousPage = page - 1
+        this.$router.push({ path: `/new/${previousPage}` })
+      }
+    }
+  },
   // 4 Add an apollo object to your component and add an allLinks property to it
   apollo: {
     allLinks: {
       query: ALL_LINKS_QUERY,
+      variables() {
+        const page = parseInt(this.$route.params.page, 10)
+        const isNewPage = this.$route.path.includes('new')
+        const skip = isNewPage ? (page - 1) * LINKS_PER_PAGE : 0
+        const first = isNewPage ? LINKS_PER_PAGE : 100
+        const orderBy = isNewPage ? 'createdAt_DESC' : null
+        return {
+          first,
+          skip,
+          orderBy
+        }
+      },
+      update(data) {
+        this.count = data._allLinksMeta.count
+        return data.allLinks
+      },
       subscribeToMore: [
         // Each object in this array contains a document prop, which represents the subscription itself. In this case, it will fire for created events on the link type, i.e. every time a new link is created
         {
@@ -44,7 +117,7 @@ export default {
             ]
             const result = {
               ...previous,
-              allLinks: newAllLinks.slice(0, 5)
+              allLinks: newAllLinks.slice(0, LINKS_PER_PAGE)
             }
             return result
           }

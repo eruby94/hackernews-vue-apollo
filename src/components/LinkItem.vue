@@ -18,7 +18,7 @@
 <script>
 import { timeDifferenceForDate } from '../utils'
 import { CREATE_VOTE_MUTATION, ALL_LINKS_QUERY } from '../constants/graphql'
-import { GC_USER_ID } from '../constants/settings'
+import { GC_USER_ID, LINKS_PER_PAGE } from '../constants/settings'
 
 export default {
   name: 'LinkItem',
@@ -34,7 +34,12 @@ export default {
       }
     }
   },
-  props: ['link', 'index'],
+  data() {
+    return {
+      linksPerPage: LINKS_PER_PAGE
+    }
+  },
+  props: ['link', 'index', 'pageNumber'],
   methods: {
     timeDifferenceForDate,
     voteForLink() {
