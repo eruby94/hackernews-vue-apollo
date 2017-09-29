@@ -26,10 +26,43 @@ export const ALL_LINKS_QUERY = gql`
   }
 `
 
+export const ALL_LINKS_SEARCH_QUERY = gql`
+  query AllLinksSearchQuery($searchText: String!) {
+    allLinks(
+      filter: {
+        # only return a link if the url or description contains the searchText
+        OR: [
+          { url_contains: $searchText }
+          { description_contains: $searchText }
+        ]
+      }
+    ) {
+      id
+      url
+      description
+      createdAt
+      postedBy {
+        id
+        name
+      }
+      votes {
+        id
+        user {
+          id
+        }
+      }
+    }
+  }
+`
+
 // 1 Create a javascript const to store the mutation
 export const CREATE_LINK_MUTATION = gql`
   # 2 define the actual mutation. It takes two arguments, url and description, to be provided when it is called
-  mutation createLinkMutation($description: String!, $url: String!) {
+  mutation createLinkMutation(
+    $description: String!
+    $url: String!
+    $postedById: ID!
+  ) {
     createLink(description: $description, url: $url, postedById: $postedById) {
       id
       createdAt
@@ -89,35 +122,6 @@ export const CREATE_VOTE_MUTATION = gql`
       }
       user {
         id
-      }
-    }
-  }
-`
-
-export const ALL_LINKS_SEARCH_QUERY = gql`
-  query AllLinksSearchQuery($searchText: String!) {
-    allLinks(
-      filter: {
-        # only return a link if the url or description contains the searchText
-        OR: [
-          { url_contains: $searchText }
-          { description_contains: $searchText }
-        ]
-      }
-    ) {
-      id
-      url
-      description
-      createdAt
-      postedBy {
-        id
-        name
-      }
-      votes {
-        id
-        user {
-          id
-        }
       }
     }
   }

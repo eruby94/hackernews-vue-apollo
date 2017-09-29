@@ -2,9 +2,7 @@
   <div class="flex mt2 items-start">
     <div class="flex items-center">
       <span class="gray">{{linkNumber}}.</span>
-      <div v-if="userId" class="ml1 gray f11 upvote" @click="voteForLink()">
-        ▲
-      </div>
+      <div v-if="userId" class="ml1 gray f11 upvote" @click="voteForLink()">^</div>
     </div>
     <div class="ml1">
       <a :href="link.url" class="link">{{link.description}} ({{link.url}})</a>
